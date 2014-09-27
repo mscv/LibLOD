@@ -5,7 +5,7 @@ does NOT play nice with Gemini:Addon and modules!
 
 Gemini:Addon:
 	use LoadSet()/LoadSetFlat() with bRunOnLoad == true
-	requires forked Gemini:Addon to enable synchronous DelayedEnable() execution: 
+	requires forked Gemini:Addon to enable synchronous DelayedEnable() execution: https://github.com/mscv/GeminiAddon
 
 
 
@@ -175,7 +175,7 @@ function Lib:LoadSetFlat(strSet, bRunOnLoad)
 		local func = assert(loadfile(v))
 		if func then xpcall(func, fnErrorHandler) end
 	end
-	dupa5 = tSet
+
 	if bRunOnLoad then Apollo.GetAddon(tSet.addonName):OnLoad(true) end
 	
 	tSet.isLoaded = true
