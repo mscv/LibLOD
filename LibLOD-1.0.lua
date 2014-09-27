@@ -77,7 +77,7 @@ local Lib = APkg and APkg.tPackage or {}
 -------------------------------------------------------------------------------
 --- Upvalues
 -------------------------------------------------------------------------------
-local strmatch = string.match
+local strmatch, next = string.match, next
 local Apollo, XmlDoc = Apollo, XmlDoc
 
 -------------------------------------------------------------------------------
@@ -95,7 +95,7 @@ local fnErrorHandler = tLibError and tLibError.tPackage and tLibError.tPackage.E
 -------------------------------------------------------------------------------
 
 local function buildSetList()
-	-- addon folder & toc grabbing stolen from Gemini:Addon-1.1
+	-- addon folder & toc grabbing stolen from LibApolloFixes
 	local strWildstarDir = strmatch(Apollo.GetAssetFolder(), "(.-)[\\/][Aa][Dd][Dd][Oo][Nn][Ss]")
 	local tAddonXML = XmlDoc.CreateFromFile(strWildstarDir.."\\Addons.xml"):ToTable()
 	for _,v in next, tAddonXML do
@@ -168,7 +168,7 @@ function Lib:LoadSetFlat(strSet)
 	if buildSetList then buildSetList() end
 	
 	local tSet = tSetListFlat[strSet]
-	if not tSet then return end
+	if not tSet or tSet.isLoaded then return end
 	
 	for _, v in next, tSet.scripts do
 		local func = assert(loadfile(v))
