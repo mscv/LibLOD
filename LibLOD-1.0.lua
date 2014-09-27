@@ -3,8 +3,9 @@ THIS IS ONLY A PoC. It's ugly, deal with it.
 
 does NOT play nice with Gemini:Addon and modules!
 
-	Gemini:Addon expects all modules to be there when calling OnLoad (which starts initializequeue and enablequeue for the addon and modules)
-	workaround: call addon:OnLoad(), addon:Disable(), addon:Enable() on the addon you are injecting
+Gemini:Addon:
+	use LoadSet()/LoadSetFlat() with bRunOnLoad == true
+	requires forked Gemini:Addon to enable synchronous DelayedEnable() execution: 
 
 
 
@@ -14,7 +15,7 @@ required toc.xml structure:
 <?xml version="1.0" encoding="UTF-8"?>
 <Addon Author="Some Author" APIVersion="9" Name="Some Name" Description="Some Description">
 	<Script Name="SomeLoadOnStartScript.lua"/>
-	<LoadOnDemandSet name="someSetName1">
+	<LoadOnDemandSet name="someSetName1" addon="Some Name">			<!-- 'addon' is the actual addon we are injecting, doesn't have to be our addon -->
 		<Meta key="someKey1" value="someValue1" />
 		<Meta key="someKey2" value="someValue2" />
 	    <Script Name="SomeLoadOnStartScript1.lua"/>
@@ -109,7 +110,7 @@ local function buildSetList()
 						local set = tTocTable[i]
 						if set.__XmlNode == 'LoadOnDemandSet' then
 							if not tSetList[addonName] then	tSetList[addonName] = {} end
-							tSetList[addonName][set.name] = { meta = {}, scripts = {} } -- we assume each set in an addon has a unique name
+							tSetList[addonName][set.name] = { meta = {}, scripts = {}, addonName = set.addon } -- we assume each set in an addon has a unique name
 							for j = 1, #set do
 								local child = set[j]
 								if child.__XmlNode == 'Meta' then
@@ -163,7 +164,7 @@ function Lib:GetSetMetadata(strAddon, strSet, strMetaKey)
 	return self:GetSetMetadataFlat(strAddon .. "_" .. strSet, strMetaKey)
 end
 
-function Lib:LoadSetFlat(strSet)
+function Lib:LoadSetFlat(strSet, bRunOnLoad)
 	if not strSet then return end
 	if buildSetList then buildSetList() end
 	
@@ -174,15 +175,17 @@ function Lib:LoadSetFlat(strSet)
 		local func = assert(loadfile(v))
 		if func then xpcall(func, fnErrorHandler) end
 	end
+	dupa5 = tSet
+	if bRunOnLoad then Apollo.GetAddon(tSet.addonName):OnLoad(true) end
 	
 	tSet.isLoaded = true
 	return true
 end
 
-function Lib:LoadSet(strAddon, strSet)
+function Lib:LoadSet(strAddon, strSet, bRunOnLoad)
 	if not strAddon or not strSet then return end
 	
-	return self:LoadSetFlat(strAddon .. "_" .. strSet)
+	return self:LoadSetFlat(strAddon .. "_" .. strSet, bRunOnLoad)
 end
 
 function Lib:IsSetLoadedFlat(strSet)
