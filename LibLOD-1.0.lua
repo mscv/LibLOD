@@ -4,8 +4,8 @@ THIS IS ONLY A PoC. It's ugly, deal with it.
 does NOT play nice with Gemini:Addon and modules!
 
 	Gemini:Addon expects all modules to be there when calling OnLoad (which starts initializequeue and enablequeue for the addon and modules)
-	workaround: call the OnLoad() on the addon you are injecting the modules into + Disable() and Enable() on the module injected ... i think :P
-		--> if Embeds are not needed, it's enough to Disable() & Enable() the module (+ if you use it, OnInitialize()). You still have to get a reference to it somehow ...
+	workaround: call addon:OnLoad(), addon:Disable(), addon:Enable() on the addon you are injecting
+
 
 
 
@@ -176,6 +176,7 @@ function Lib:LoadSetFlat(strSet)
 	end
 	
 	tSet.isLoaded = true
+	return true
 end
 
 function Lib:LoadSet(strAddon, strSet)
